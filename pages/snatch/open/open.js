@@ -1,4 +1,5 @@
 var app = getApp();
+
 Page({
   data: {
     id: "",
@@ -40,27 +41,35 @@ Page({
   upload: function (filePath, fileName) {
     var that = this;
     // 签名
-    var signature = "+trgRLSGHaM48mTMYYVPkEOQSu1hPTEyNTU0Nzg4NDQmaz1BS0lEU3M2OTFqV3VJVmFVQ3BtZnQwd2dGZHc3N3dhM3JRTDYmZT0xNTIwODQxOTIyJnQ9MTUxMzA2NTkyMiZyPTE2NjE4MjE3OTAmZj0vMTI1NTQ3ODg0NC9waWN0dXJlJmI9cGljdHVyZQ==";
-    var DIR_NAME = '/img/'
-    var cosUrl = "https://gz.file.myqcloud.com/files/v2/1255478844/picture" + DIR_NAME
+    var signature = "q-sign-algorithm=sha1&q-ak=AKIDzAFLrFcPCya1UsbiGF7mhUvFOL5c46Op&q-sign-time=1529061814;1577746800&q-key-time=1529061814;1577746800&q-header-list=host&q-url-param-list=&q-signature=e78c82864c600bf2d00f35e1c0fd56511b0b2012";
+    var DIR_NAME = '/'
+    var cosUrl = "https://lynnjy-1253375374.cos.ap-guangzhou.myqcloud.com" + DIR_NAME
+    var Parser = require("./../../../utils/xmlParse-lib/dom-parser.js")
     // 头部带上签名，上传文件至COS
 
     wx.showLoading({
       title: '正在获取照片',
       mask: true,
     })
+    
     wx.uploadFile({
-      url: cosUrl + fileName,
+      url: cosUrl,
       filePath: filePath,
       header: {
-        'Authorization': signature
+        'Content-Type':'multipart/form-data;boundary=e07f2a7876ae4755ae18d300807ad879'
       },
-      name: 'filecontent',
+      name: 'file',
       formData: {
-        op: 'upload'
+        'key': 'img/${filename}',
+        'success_action_status': 201,
+        'Signature':signature
       },
       success: function (uploadRes) {
-        var url = JSON.parse(uploadRes.data).data.source_url;
+        // var url = JSON.parse(uploadRes.data).data.source_url;
+        var xmlParser = new Parser.DOMParser();
+        var doc = xmlParser.parseFromString(uploadRes.data);
+        var url = doc.getElementsByTagName("Location")[0].firstChild.nodeValue;
+        console.log(url);
         
         wx.hideLoading();
 
